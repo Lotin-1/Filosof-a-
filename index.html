@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filosofía vs. Ciencia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: black;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Contenedor del video */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .video-container video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+        }
+
+        /* Botón Start CENTRADO */
+        .start-button {
+            position: relative;
+            top: 56.2%;
+            left: 5%;
+            transform: translate(-50%, -50%);
+            font-size: 22px;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+            background: linear-gradient(to right, #ffcc00b4, #ff4d00);
+            box-shadow: 0 0 20px rgba(255, 60, 0, 0.8);
+            transition: 0.3s;
+        }
+
+        .start-button:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: linear-gradient(to right, #ff5722, #ffcc00);
+        }
+
+        /* Contenedor del juego */
+        .game-container {
+            display: none;
+            position: relative;
+            z-index: 1;
+        }
+
+        .flashcard-container {
+            position: relative;
+            width: 500px;
+            height: 300px;
+            perspective: 1000px;
+        }
+
+        .flashcard {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+        }
+
+        .flashcard video {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+        }
+
+        .hidden {
+            opacity: 0;
+            transform: rotateY(180deg);
+        }
+
+        /* Estilos de los botones de respuesta */
+        .buttons {
+            margin-top: 20px;
+        }
+
+        .choice-button {
+            margin: 10px;
+            padding: 15px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* Botón Filosofía (rojo luminoso) */
+        .philosophy {
+            background: red;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+        }
+
+        .philosophy:hover {
+            background: #ff1a1a;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 1);
+            transform: scale(1.05);
+        }
+
+        /* Botón Ciencia (azul luminoso) */
+        .science {
+            background: blue;
+            box-shadow: 0 0 15px rgba(0, 0, 255, 0.8);
+        }
+
+        .science:hover {
+            background: #1a1aff;
+            box-shadow: 0 0 25px rgba(0, 0, 255, 1);
+            transform: scale(1.05);
+        }
+
+        /* Feedback */
+        #feedback {
+            font-size: 20px;
+            margin-top: 15px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Contenedor del video final */
+        .final-video-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px; /* Ancho del contenedor para el marco */
+            height: 450px; /* Altura del contenedor para el marco */
+            z-index: 3;
+            overflow: hidden;
+            border: 5px solid #fff; /* Borde blanco */
+            border-radius: 10px; /* Bordes redondeados */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); /* Sombra para el marco */
+        }
+
+        .final-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ajusta el video para llenar el contenedor */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Video de portada -->
+    <div class="video-container" id="videoContainer">
+        <video autoplay loop muted>
+            <source src="videos/intro.mp4" type="video/mp4">
+        </video>
+        <button class="start-button" onclick="startGame()">Start</button>
+    </div>
+
+    <!-- Contenido del juego -->
+    <div class="game-container" id="gameContainer">
+        <h1>Filosofía vs. Ciencia</h1>
+        <div class="flashcard-container">
+            <div class="flashcard" id="flashcard">
+                <video id="questionVideo" autoplay loop muted></video>
+            </div>
+        </div>
+        <div class="buttons">
+            <button class="choice-button philosophy" onclick="answer('filosofia')">Filosofía</button>
+            <button class="choice-button science" onclick="answer('ciencia')">Ciencia</button>
+        </div>
+        <p id="feedback"></p>
+    </div>
+
+    <!-- Contenedores de video final -->
+    <div class="final-video-container" id="finalCiencia">
+        <video autoplay loop muted>
+            <source src="videos/finalCiencia.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="final-video-container" id="finalFilosofia">
+        <video autoplay loop muted>
+            <source src="videos/finalFilosofia.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="final-video-container" id="finalEmpate">
+        <video autoplay loop muted>
+            <source src="videos/finalEmpate.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <script>
+        let correctPhilosophy = 0; // Contador de respuestas correctas de Filosofía
+        let correctScience = 0; // Contador de respuestas correctas de Ciencia
+
+        function startGame() {
+            document.getElementById("videoContainer").style.display = "none";
+            document.getElementById("gameContainer").style.display = "block";
+            loadQuestion();
+        }
+
+        const questions = [
+            { video: "videoscartas/carta1.mp4", correct: "filosofia" },
+            { video: "videoscartas/carta2.mp4", correct: "ciencia" },
+            { video: "videoscartas/carta3.mp4", correct: "filosofia" },
+            { video: "videoscartas/carta4.mp4", correct: "ciencia" }
+        ];
+
+        let currentQuestion = 0;
+
+        function loadQuestion() {
+            const flashcard = document.getElementById("flashcard");
+            flashcard.classList.add("hidden");
+            setTimeout(() => {
+                document.getElementById("questionVideo").src = questions[currentQuestion].video;
+                document.getElementById("questionVideo").load(); // Carga el nuevo video
+                flashcard.classList.remove("hidden");
+            }, 600);
+        }
+
+        function answer(choice) {
+            const feedback = document.getElementById("feedback");
+            if (choice === questions[currentQuestion].correct) {
+                feedback.textContent = "¡Correcto!";
+                feedback.style.color = "#2ecc71";
+                if (choice === "filosofia") {
+                    correctPhilosophy++;
+                } else {
+                    correctScience++;
+                }
+            } else {
+                feedback.textContent = "Incorrecto";
+                feedback.style.color = "#e74c3c";
+            }
+            feedback.style.opacity = "1";
+            setTimeout(() => {
+                feedback.style.opacity = "0";
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    loadQuestion();
+                } else {
+                    endGame();
+                }
+            }, 2000);
+        }
+
+        function endGame() {
+            document.getElementById("gameContainer").style.display = "none"; // Oculta el contenedor del juego
+
+            // Muestra el video final correspondiente según el puntaje
+            if (correctPhilosophy === questions.length) {
+                // Si todas las respuestas son correctas
+                document.getElementById("finalEmpate").style.display = "block";
+                document.getElementById("finalEmpate").querySelector("video").play();
+            } else if (correctPhilosophy > correctScience) {
+                // Si Filosofía tiene más respuestas correctas
+                document.getElementById("finalFilosofia").style.display = "block";
+                document.getElementById("finalFilosofia").querySelector("video").play();
+            } else if (correctScience > correctPhilosophy) {
+                // Si Ciencia tiene más respuestas correctas
+                document.getElementById("finalCiencia").style.display = "block";
+                document.getElementById("finalCiencia").querySelector("video").play();
+            } else {
+                // Si hay un empate
+                document.getElementById("finalEmpate").style.display = "block";
+                document.getElementById("finalEmpate").querySelector("video").play();
+            }
+        }
+    </script>
+
+</body>
+</html>
